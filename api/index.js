@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors')
 import router from './router/indexRouter'
 import sequelize from './model/dataSource'
 import { globalErrorHandler } from './utils/error'
@@ -7,6 +8,7 @@ import { globalErrorHandler } from './utils/error'
 const createApp = () => {
     const app = express();
 
+    app.use(cors())
     app.use(morgan("tiny"));
     app.use(express.json())
     app.use(express.urlencoded({limit : '300mb',parameterLimit : 100000, extended : true}))

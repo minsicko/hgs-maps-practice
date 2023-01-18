@@ -40,7 +40,7 @@ export default {
         await feedService.delete_post(post_id)
         res.status(204).json()
     }),
-
+//? DTO
 
 //? MOCK DATA FUNCTIONS
     addPost(req, res) {
