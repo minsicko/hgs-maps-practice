@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Map App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="map" style="width:500px;height:400px;"></div>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=12f16207e7ac3a80ca46e35298383b09"></script>
+  <script>
+    var container = document.getElementById('map');
+    var options = {
+        center: new kakao.maps.LatLng(37.522220423851095, 127.02026035630946),
+        level: 3
+    };
+
+    var map = new kakao.maps.Map(container, options);
+
+    var markerPosition  = new kakao.maps.LatLng(37.522220423851095, 127.02026035630946); 
+
+    var marker = new kakao.maps.Marker({
+    position: markerPosition
+    });
+
+    marker.setMap(map);
+</script>
+  <script src="./index.vue"></script>
+</body>
+</html>
