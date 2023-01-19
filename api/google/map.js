@@ -1,15 +1,3 @@
-// let a = `
-//     SELECT
-//     c.name,
-//     c.address,
-//     c.phone_number,
-//     c.email,
-//     c.hours,
-//     c.profile_image,
-//     FROM company AS c
-    
-// `
-
 import { Sequelize, DataTypes } from 'sequelize'
 import sequelize from '../model/dataSource'
 
@@ -29,6 +17,8 @@ const companies = sequelize.define('companies', {
 
 companies.sync();
 
+//! create 2000 random companies
+//! check i initialize !!
 // var coordinates = []
 // for (var i = 2000; i < 4000; i++) {
 //   var lat = (Math.random() * 180) - 90;  // generates a random decimal between -90 and 90
