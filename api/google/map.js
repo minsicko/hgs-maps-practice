@@ -36,7 +36,7 @@ companies.sync();
 
 const centerLat = '-159.9613975616936'
 const centerLng = '-79.61498929174193'
-const distance = '300' // kilometer
+const distance = '500' // kilometer
 
 export default {
     get_companies : async (req, res) => {
@@ -48,12 +48,6 @@ export default {
     },
 
     get_nearby : async (req, res) => {
-        const boundingBox = sequelize.literal(`ST_GeomFromText('Polygon((
-            ${centerLng - distance} ${centerLat - distance}, ${centerLng - distance} ${centerLat + distance}, 
-            ${centerLng + distance} ${centerLat + distance}, ${centerLng + distance} ${centerLat - distance}, 
-            ${centerLng - distance} ${centerLat - distance}
-            ))')`);
-        
         const [nearby_locations] = await sequelize.query(`
         SELECT 
             c.id, c.name, c.location, c.createdAt, c.updatedAt 
