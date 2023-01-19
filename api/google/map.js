@@ -29,34 +29,24 @@ const companies = sequelize.define('companies', {
 
 companies.sync();
 
-var coordinates = []
-for (var i = 0; i < 2000; i++) {
-  var lat = (Math.random() * 180) - 90;  // generates a random decimal between -90 and 90
-  var lng = (Math.random() * 360) - 180; // generates a random decimal between -180 and 180
-  coordinates.push({name: 'company ' + (i+1).toString(), location: [lat, lng]});
-}
-console.log(coordinates)
-
-companies.bulkCreate(coordinates)
-    .then(() => {
-    console.log('Data has been successfully inserted!');
-    })
-    .catch((error) => {
-    console.log('Error while inserting data:', error);
-    });
-// for (let i=0; i<coordinates.length; i++){
-//     const point = { type: 'Point', coordinates: coordinates[i] };
-
-//     companies.create({
-//     name: 'company '+ (i+1).toString(),
-//     location: Sequelize.fn('ST_GeomFromGeoJSON', JSON.stringify(point))
-//     });    
+// var coordinates = []
+// for (var i = 2000; i < 4000; i++) {
+//   var lat = (Math.random() * 180) - 90;  // generates a random decimal between -90 and 90
+//   var lng = (Math.random() * 360) - 180; // generates a random decimal between -180 and 180
+//   coordinates.push({name: 'company ' + (i+1).toString(), location: Sequelize.fn('ST_GeomFromText',`POINT (${lng} ${lat})`) });
 // }
-//bulkCreate
+// console.log(coordinates)
+// companies.bulkCreate(coordinates)
+// .then(() => {
+// console.log('Data has been successfully inserted!');
+// })
+// .catch((error) => {
+// console.log('Error while inserting data:', error);
+// });
 
-const centerLng = '45'
-const centerLat = '45'
-const distance = '.09'
+const centerLat = '-159.9613975616936'
+const centerLng = '-79.61498929174193'
+const distance = '300' // kilometer
 
 export default {
     get_companies : async (req, res) => {
@@ -67,47 +57,43 @@ export default {
         res.status(200).json({locations})
     },
 
-    get_nearby : (req, res) => {
+    get_nearby : async (req, res) => {
         const boundingBox = sequelize.literal(`ST_GeomFromText('Polygon((
             ${centerLng - distance} ${centerLat - distance}, ${centerLng - distance} ${centerLat + distance}, 
             ${centerLng + distance} ${centerLat + distance}, ${centerLng + distance} ${centerLat - distance}, 
             ${centerLng - distance} ${centerLat - distance}
             ))')`);
         
-        const nearby_locations = companies.query(`
+        const [nearby_locations] = await sequelize.query(`
         SELECT 
-            id, name, location, createdAt, updatedAt 
+            c.id, c.name, c.location, c.createdAt, c.updatedAt 
         FROM 
-            companies AS companies 
+            companies AS c 
         WHERE 
-            ST_Contains(
-                ST_Transform(
-                    ST_GeomFromText(
-                        Polygon(
-                            ${centerLng - distance} ${centerLat - distance}, ${centerLng - distance} ${centerLat + distance}, 
-                            ${centerLng + distance} ${centerLat + distance}, ${centerLng + distance} ${centerLat - distance}, 
-                            ${centerLng - distance} ${centerLat - distance}
-                        )
-                    ), 
-                    4326
-                )
+            MBRCONTAINS(
+                ST_LINESTRINGFROMTEXT(
+                    CONCAT(
+                        'LINESTRING(', 
+                            ${centerLat} -  IF(${centerLat} < 0, 1, -1) * ${distance * 1000} / 2 / ST_DISTANCE_SPHERE(POINT(${centerLat}, ${centerLng}), POINT(${centerLat} + IF(${centerLat} < 0, 1, -1), ${centerLng})), 
+                            ' ', 
+                            ${centerLng} -  IF(${centerLat} < 0, 1, -1) * ${distance * 1000} / 2 / ST_DISTANCE_SPHERE(POINT(${centerLat}, ${centerLng}), POINT(${centerLat}, ${centerLng} + IF(${centerLng} < 0, 1, -1))), 
+                            ',', 
+                            ${centerLat} +  IF(${centerLat} < 0, 1, -1) * ${distance * 1000} / 2 / ST_DISTANCE_SPHERE(POINT(${centerLat}, ${centerLng}), POINT(${centerLat} + IF(${centerLat} < 0, 1, -1), ${centerLng})), 
+                            ' ', 
+                            ${centerLng} +  IF(${centerLat} < 0, 1, -1) * ${distance * 1000} / 2 / ST_DISTANCE_SPHERE(POINT(${centerLat}, ${centerLng}), POINT(${centerLat}, ${centerLng} + IF(${centerLng} < 0, 1, -1))),
+                        ')'
+                    )
+                ), 
+                location
             )
-       `);
-        res.status(200).json({nearby_locations})
+    `);
+
+    console.log(nearby_locations)
+    res.status(200).json(nearby_locations)
     }
 }
 
-
-
-
 /////////////////
-// const centerLat = 37.7749;
-// const centerLng = -122.4194;
-// const distance = 0.1;
-
-
-
-
 
 // let query = `SELECT 
 // estate.id,
